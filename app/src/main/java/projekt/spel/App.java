@@ -3,13 +3,160 @@
  */
 package projekt.spel;
 
+
+import java.util.Scanner;
+
 public class App {
-    public static final int rows=3;
-    public static final int cols=3;
+    public void run() {
+        // write in player
+        Scanner scan = new Scanner(System.in);
+        System.out.println("Write in name of player for black: ");
+        String nameBlack = scan.nextLine();
+        System.out.println("Write in name of player for white: ");
+        String nameWhite = scan.nextLine();
+
+        // print out the board
+        //System.out.print("Please enter your favorite size>=5 of board: ");
+        //int size = scan.nextInt();
+        int size=15;
+        int[][] table = new int[size][size];
+
+        printTable(table, size);
 
 
-    public static void main(String[] args) {
+        // start the game
+        int win = 0;
+        int currentPlayer=0;
+        do {
+            // playing
+            // remind player to play
+            String playerName=currentPlayer==0? nameBlack: nameWhite;
+            System.out.println(playerName+ "s turn");
 
-        System.out.println("Hej RUI");
+            // get the coordinate
+            int x,y;
+            boolean canPlace= true;
+            do{
+                if(!canPlace){
+                    System.out.println("Busy! Choose another coordinate!");
+                }
+                String code= scan.nextLine();
+                y=code.charAt(0)-'A';
+                x=Integer.parseInt(code.substring(1))-1;
+
+                canPlace=true;
+                canPlace=canPlace&& x>=0 &&x<size;
+                canPlace=canPlace&& y>=0 &&y<size;
+                canPlace=canPlace&& table[y][x]==0;
+            }while(!canPlace);
+
+            //
+            table[y][x]=currentPlayer==0?1:2;
+            currentPlayer ++;
+            currentPlayer%=2;
+
+            // print board
+            printTable(table, size);
+
+            // check result
+            check(table, x, y);
+        } while (win == 0);
+
+        // show the winner
+        if (win == 1) {
+            System.out.println(nameBlack + " Win!");
+        } else if (win == 2) {
+            System.out.println(nameWhite + " Win!");
+        } else if (win == 3) {
+            System.out.println("Draw!");
+        }
+    }
+
+        public void printTable(int[][] table, int size)
+        {
+            System.out.print("   ");
+            for (int i = 0; i < size; i++) {
+                int value = i + 1;
+                System.out.print(value < 10 ? value + "  " : value + " ");
+            }
+            System.out.println();
+
+            for (int i = 0; i < size; i++) {
+                char title = (char) ('A' + i);
+                System.out.print(title + "  ");
+                for (int j = 0; j < size; j++) {
+                    int value = table[i][j];
+                    char c = ' ';
+                    switch (value) {
+                        case 0:
+                            c = '_';
+                            break;
+                        case 1:
+                            c = 'X';
+                            break;
+                        case 2:
+                            c = 'O';
+                            break;
+
+
+                    }
+                    System.out.print(c + "  ");
+                }
+                System.out.println();
+            }
+
+
+        }
+
+        public int check(int[][] table, int x, int y)
+        {
+            boolean test=false;
+            test= test||moreThanFive(table,x,y,0,-1);
+            test= test||moreThanFive(table,x,y,1,-1);
+            test= test||moreThanFive(table,x,y,1,0);
+            test= test||moreThanFive(table,x,y,1,1);
+
+            if(test){
+                return table[y][x];
+            }
+
+            return 0;
+        }
+
+        public boolean moreThanFive(int [][] table, int x, int y, int dx, int dy)
+        {
+            int count=0;
+            count +=count(table, x, y, dx,dy);
+            count +=count(table,x,y,-dx,-dy);
+            count -=1;
+            return count>=5;
+        }
+
+        public int count(int[][] table, int originX, int originY, int dx, int dy){
+            int originValue=table[originY][originX];
+            int count =0;
+            int x=originX;
+            int y=originY;
+
+            int value = 0;
+            do{
+                count++;
+                originX+=dx;
+                originY+=dy;
+                try {
+                    value = table[originY][originX];
+                }catch (Throwable e)  {
+                    System.out.println(originX);
+                    System.out.println(originY);
+                }
+            }while(value==originValue);
+
+            return  count;
+        }
+
+
+    public static void main (String[]args)
+    {
+        new App().run();
     }
 }
